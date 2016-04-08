@@ -72,8 +72,8 @@ namespace TypeResolver
 
             //if type is gen param, then we return array of one, guarding against bad subject - which would be an open generic type
             if(t.IsGenericParameter) {
-                return (s) => s.IsGenericParameter
-                                ? new[] { s }
+                return (s) => !s.IsOpenGeneric() //THIS IS WRONG CURRENTLY - see above comment
+                                ? new[] { s }       //also - don't we have to modify downstream types returned?
                                 : null;
             }
 

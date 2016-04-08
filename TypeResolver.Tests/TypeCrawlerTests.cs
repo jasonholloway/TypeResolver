@@ -35,9 +35,25 @@ namespace TypeResolver.Tests
         [TestMethod]
         public void CrawlerReturnsInPlaceGenArgument() 
         {
-            throw new NotImplementedException();
+            var crawler = TypeCrawlerCreator.Visit(typeof(List<>));
+
+            var result = crawler(typeof(List<int>));
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.SequenceEqual(new[] { typeof(int) }));
         }
 
+
+        [TestMethod]
+        public void CrawlerReturnsNestedInPlaceGenArgument() 
+        {
+            var crawler = TypeCrawlerCreator.Visit(typeof(List<>).MakeGenericType(typeof(List<>)));
+
+            var result = crawler(typeof(List<List<int>>));
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.SequenceEqual(new[] { typeof(int) }));
+        }
 
 
 

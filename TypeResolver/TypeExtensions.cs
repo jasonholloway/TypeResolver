@@ -19,7 +19,8 @@ namespace TypeResolver
                 return false;
             }
             
-            return @this.GetGenericArguments().Any(a => a.IsOpenGeneric());
+            return @this.GetGenericArguments()
+                        .Any(a => a.IsOpenGeneric());
         }
 
     }
