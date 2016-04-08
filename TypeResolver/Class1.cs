@@ -59,18 +59,26 @@ namespace TypeResolver
     //is its subject type what it was expecting? If not, return null.
 
 
-    public static class TypeCrawlerFactory
+    public static class TypeCrawlerCreator
     {
         public static Func<Type, IEnumerable<Type>> Visit(Type t) 
-        {
-            //return lambda that scrapes the types from its subject, or returns null if it finds the subject's form wrong
-            //...
+        {            
+            //if type is simple, then we just return empty type arg (signifying success), via a guard ensuring subject is type expected
+            if(!t.IsGenericType) {
+                return (s) => s == t
+                              ? Type.EmptyTypes
+                              : null;
+            }
 
-            //would crawler itself ever return null? No.
-            
-            return s => s == t 
-                          ? Enumerable.Empty<Type>() 
-                          : null;
+            //if type is gen param, then we return array of one, guarding against bad subject - which would be an open generic type
+            if(t.IsGenericParameter) {
+                return (s) => s.IsGenericParameter
+                                ? new[] { s }
+                                : null;
+            }
+
+            //if type has gen args, then we delegate downwards, via a guard comparing that gendef if as expected
+            return s => null; //...
         }
     }
 

@@ -12,7 +12,7 @@ namespace TypeResolver.Tests
         [TestMethod]
         public void CrawlerReturnsNullIfBadMatch() 
         {
-            var crawler = TypeCrawlerFactory.Visit(typeof(int));
+            var crawler = TypeCrawlerCreator.Visit(typeof(int));
 
             var result = crawler(typeof(long));
 
@@ -21,9 +21,9 @@ namespace TypeResolver.Tests
 
         
         [TestMethod]
-        public void CrawlerReturnsEmptyEnumerationIfGoodsimpleMatch() 
+        public void CrawlerReturnsEmptyEnumerationIfGoodSimpleMatch() 
         {
-            var crawler = TypeCrawlerFactory.Visit(typeof(int));
+            var crawler = TypeCrawlerCreator.Visit(typeof(int));
 
             var result = crawler(typeof(int));
 
@@ -32,7 +32,11 @@ namespace TypeResolver.Tests
         }
 
 
-
+        [TestMethod]
+        public void CrawlerReturnsInPlaceGenArgument() 
+        {
+            throw new NotImplementedException();
+        }
 
 
 
