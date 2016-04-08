@@ -12,12 +12,16 @@ namespace TypeResolver.Tests
 
         class Simple : ISimple { }
 
+        interface IAnother { }
+
 
         interface ISimpleGeneric<T> { }
 
         class SimpleGeneric<T> : ISimpleGeneric<T> { }
 
         class NestedGeneric<T> : ISimpleGeneric<List<T>> { }
+        
+        class FullySpecified : ISimpleGeneric<string> { }
 
 
         [TestMethod]
@@ -28,7 +32,7 @@ namespace TypeResolver.Tests
         }
 
         [TestMethod]
-        public void AcceptsFullyMatchedGenericRelation() {
+        public void AcceptsSymmetricalGenericRelation() {
             var vec = Analyser.Analyse(typeof(SimpleGeneric<>), typeof(ISimpleGeneric<>));
 
             Assert.IsNotNull(vec);
@@ -42,13 +46,24 @@ namespace TypeResolver.Tests
         }
 
         [TestMethod]
-        public void AcceptsNestedGenericRelation() {
+        public void AcceptsNestedGenericArg() {
             var tNestedAbstract = typeof(ISimpleGeneric<>).MakeGenericType(typeof(List<>));
 
             var vec = Analyser.Analyse(typeof(NestedGeneric<>), tNestedAbstract);
 
             Assert.IsNotNull(vec);
         }
+
+
+        [TestMethod]
+        public void RejectsBadSimple() {
+            var vec = Analyser.Analyse(typeof(Simple), typeof(IAnother));
+
+            Assert.IsNull(vec);
+        }
+
+
+
 
 
 

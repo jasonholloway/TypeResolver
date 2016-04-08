@@ -1,7 +1,6 @@
-TestResult.xml
-TestsResult.xml
+TestResults.xml
 
 bin
 obj
 packages
-
+.vs
