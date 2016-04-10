@@ -12,7 +12,7 @@ namespace TypeResolver.Tests
         [TestMethod]
         public void CrawlerReturnsNullIfBadMatch() 
         {
-            var crawler = TypeCrawlerCreator.Visit(typeof(int));
+            var crawler = TypeMatcherFactory.BuildFor(typeof(int));
 
             var result = crawler(typeof(long));
 
@@ -23,7 +23,7 @@ namespace TypeResolver.Tests
         [TestMethod]
         public void CrawlerReturnsEmptyEnumerationIfGoodSimpleMatch() 
         {
-            var crawler = TypeCrawlerCreator.Visit(typeof(int));
+            var crawler = TypeMatcherFactory.BuildFor(typeof(int));
 
             var result = crawler(typeof(int));
 
@@ -35,7 +35,7 @@ namespace TypeResolver.Tests
         [TestMethod]
         public void CrawlerReturnsInPlaceGenArgument() 
         {
-            var crawler = TypeCrawlerCreator.Visit(typeof(List<>));
+            var crawler = TypeMatcherFactory.BuildFor(typeof(List<>));
 
             var result = crawler(typeof(List<int>));
 
@@ -47,7 +47,7 @@ namespace TypeResolver.Tests
         [TestMethod]
         public void CrawlerReturnsNestedInPlaceGenArgument() 
         {
-            var crawler = TypeCrawlerCreator.Visit(typeof(List<>).MakeGenericType(typeof(List<>)));
+            var crawler = TypeMatcherFactory.BuildFor(typeof(List<>).MakeGenericType(typeof(List<>)));
 
             var result = crawler(typeof(List<List<int>>));
 

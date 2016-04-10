@@ -59,26 +59,52 @@ namespace TypeResolver
     //is its subject type what it was expecting? If not, return null.
 
 
-    public static class TypeCrawlerCreator
+    public static class TypeMatcherFactory
     {
-        public static Func<Type, IEnumerable<Type>> Visit(Type t) 
+        public static Func<Type, IEnumerable<Type>> BuildFor(Type t) 
         {            
-            //if type is simple, then we just return empty type arg (signifying success), via a guard ensuring subject is type expected
+            //if prototype is simple, then we just return empty type arg (signifying success), via a guard ensuring subject is type expected
             if(!t.IsGenericType) {
                 return (s) => s == t
                               ? Type.EmptyTypes
                               : null;
             }
 
-            //if type is gen param, then we return array of one, guarding against bad subject - which would be an open generic type
+            //if prototype is gen param, then we return array of one, guarding against bad subject - which would be an open generic type
             if(t.IsGenericParameter) {
-                return (s) => !s.IsOpenGeneric() //THIS IS WRONG CURRENTLY - see above comment
-                                ? new[] { s }       //also - don't we have to modify downstream types returned?
+                return (s) => !s.IsOpenGeneric() 
+                                ? new[] { s }
                                 : null;
             }
 
-            //if type has gen args, then we delegate downwards, via a guard comparing that gendef if as expected
-            return s => null; //...
+            //if prototype has gen args (or params), then we delegate downwards, via a guard comparing that gendef is as expected
+
+            //need to prebuild genarg inspectors here, injecting them into below lambda
+            //these will always need to be pre-built! Cos we're building once for every possible inspection
+
+            //instead of list of types, need to relate each match to prototype's gen param, which it should share with concrete impl.
+
+            return s => {
+                if(!s.IsGenericType) {
+                    return null;
+                }
+
+                //try to match all gen args of prototype
+                //one by one, ensuring clean, immediate quit if bad match found
+                var matched = Enumerable.Empty<Type>();
+
+                foreach(var protoGenArg in t.GetGenericArguments()) {
+
+                }
+
+                throw new NotImplementedException();
+
+
+                //subject should be gen type itself
+                //otherwise bad
+
+
+            };
         }
     }
 
