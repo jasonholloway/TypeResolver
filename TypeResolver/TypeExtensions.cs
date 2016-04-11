@@ -23,5 +23,12 @@ namespace TypeResolver
                         .Any(a => a.IsOpenGeneric());
         }
 
+
+        public static Type AsGenericDefinition(this Type @this) 
+        {
+            return @this.IsGenericTypeDefinition ? @this : @this.GetGenericTypeDefinition();
+        }
+
+
     }
 }

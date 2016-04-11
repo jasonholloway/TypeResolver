@@ -56,6 +56,54 @@ namespace TypeResolver.Tests
         }
 
 
+        [TestMethod]
+        public void InspectorRejectsBadGenDef() {
+            var inspector = TypeInspectorComposer.CreateFor(typeof(List<>));
+
+            var result = inspector(typeof(Nullable<int>));
+
+            Assert.IsNull(result);
+        }
+
+
+        [TestMethod]
+        public void InspectorRejectsBadNestedGenDef() {
+            var inspector = TypeInspectorComposer.CreateFor(typeof(List<>).MakeGenericType(typeof(List<>)));
+
+            var result = inspector(typeof(List<Nullable<int>>));
+
+            Assert.IsNull(result);
+        }
+
+
+
+        [TestMethod]
+        public void InspectorRejectsBadGenArg() {
+            var inspector = TypeInspectorComposer.CreateFor(typeof(List<int>));
+
+            var result = inspector(typeof(List<float>));
+
+            Assert.IsNull(result);
+        }
+
+
+        interface IBlah<T> { }
+
+        class Blah<T> : IBlah<T[]> { }
+
+
+        [TestMethod]
+        public void InspectorReturnsGenArgModifiedByArray() 
+        {
+            var protoType = typeof(Blah<>).GetInterfaces().Single();
+
+            var inspector = TypeInspectorComposer.CreateFor(protoType);
+
+            var result = inspector(typeof(IBlah<int[]>));
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.SequenceEqual(new[] { typeof(int) }));
+        }
 
 
 

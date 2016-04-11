@@ -48,16 +48,7 @@ namespace TypeResolver
 
     }
 
-
-
-    //need to crawl through superType till we have enough genArgs discovered
-    //some relations will not include all genargs needed by concreteType
-
-    //so: we only need to crawl one type at a time, but we must be laying down a trail of lambdas as we go...
-
-    //but each leg of the crawl must half-expect to fail: 
-    //is its subject type what it was expecting? If not, return null.
-
+        
 
     public static class TypeInspectorComposer
     {
@@ -66,6 +57,14 @@ namespace TypeResolver
             if(protoType.IsGenericParameter) {
                 //if prototype is gen param, then we return encountered subject, housed in array of one
                 return (s) => new[] { s };
+            }
+
+            if(protoType.IsArray) {
+                var subInspector = CreateFor(protoType.GetElementType());
+
+                return (s) => s.IsArray
+                                ? subInspector(s.GetElementType())
+                                : null;
             }
 
             if(!protoType.IsGenericType) {
@@ -81,19 +80,22 @@ namespace TypeResolver
                                                 .Select(tt => CreateFor(tt))
                                                 .ToArray();
 
-                return (subject) => {
-                    if(!subject.IsGenericType) { //simple but effective guard
-                        return null;
-                    }
+                var protoGenDef = protoType.AsGenericDefinition();
 
-                    //************************************
-                    //need to check gendef is correct!
-                    //************************************
+                return (subject) => { 
+                    if(!subject.IsGenericType) {
+                        return null; //bad subject!
+                    }
+                    
+                    if(subject.AsGenericDefinition() != protoGenDef) {
+                        return null; //also bad subject!
+                    }
+                    
 
                     var subjectGenArgs = subject.GetGenericArguments();
 
-                    if(subjectGenArgs.Length != subInspectors.Length) { //avoids failing messily on subsequent loop
-                        return null;
+                    if(subjectGenArgs.Length != subInspectors.Length) { 
+                        return null; //avoids failing messily on subsequent loop
                     }
                     
                     //try to match gen args one by one, ensuring clean, immediate quit if discrepency found
