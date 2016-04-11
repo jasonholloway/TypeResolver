@@ -6,26 +6,26 @@ using System.Collections.Generic;
 namespace TypeResolver.Tests
 {
     [TestClass]
-    public class TypeCrawlerTests
+    public class TypeInspectorTests
     {
 
         [TestMethod]
-        public void CrawlerReturnsNullIfBadMatch() 
+        public void InspectorReturnsNullIfBadMatch() 
         {
-            var crawler = TypeMatcherFactory.BuildFor(typeof(int));
+            var inspector = TypeInspectorComposer.CreateFor(typeof(int));
 
-            var result = crawler(typeof(long));
+            var result = inspector(typeof(long));
 
             Assert.IsNull(result);
         }
 
         
         [TestMethod]
-        public void CrawlerReturnsEmptyEnumerationIfGoodSimpleMatch() 
+        public void InspectorReturnsEmptyEnumerationIfGoodSimpleMatch() 
         {
-            var crawler = TypeMatcherFactory.BuildFor(typeof(int));
+            var inspector = TypeInspectorComposer.CreateFor(typeof(int));
 
-            var result = crawler(typeof(int));
+            var result = inspector(typeof(int));
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.SequenceEqual(Enumerable.Empty<Type>()));
@@ -33,11 +33,11 @@ namespace TypeResolver.Tests
 
 
         [TestMethod]
-        public void CrawlerReturnsInPlaceGenArgument() 
+        public void InspectorReturnsInPlaceGenArgument() 
         {
-            var crawler = TypeMatcherFactory.BuildFor(typeof(List<>));
+            var inspector = TypeInspectorComposer.CreateFor(typeof(List<>));
 
-            var result = crawler(typeof(List<int>));
+            var result = inspector(typeof(List<int>));
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.SequenceEqual(new[] { typeof(int) }));
@@ -45,11 +45,11 @@ namespace TypeResolver.Tests
 
 
         [TestMethod]
-        public void CrawlerReturnsNestedInPlaceGenArgument() 
+        public void InspectorReturnsNestedInPlaceGenArgument() 
         {
-            var crawler = TypeMatcherFactory.BuildFor(typeof(List<>).MakeGenericType(typeof(List<>)));
+            var inspector = TypeInspectorComposer.CreateFor(typeof(List<>).MakeGenericType(typeof(List<>)));
 
-            var result = crawler(typeof(List<List<int>>));
+            var result = inspector(typeof(List<List<int>>));
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.SequenceEqual(new[] { typeof(int) }));

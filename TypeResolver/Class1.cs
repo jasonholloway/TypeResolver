@@ -59,52 +59,62 @@ namespace TypeResolver
     //is its subject type what it was expecting? If not, return null.
 
 
-    public static class TypeMatcherFactory
+    public static class TypeInspectorComposer
     {
-        public static Func<Type, IEnumerable<Type>> BuildFor(Type t) 
-        {            
-            //if prototype is simple, then we just return empty type arg (signifying success), via a guard ensuring subject is type expected
-            if(!t.IsGenericType) {
-                return (s) => s == t
-                              ? Type.EmptyTypes
-                              : null;
+        public static Func<Type, IEnumerable<Type>> CreateFor(Type protoType) 
+        {
+            if(protoType.IsGenericParameter) {
+                //if prototype is gen param, then we return encountered subject, housed in array of one
+                return (s) => new[] { s };
             }
 
-            //if prototype is gen param, then we return array of one, guarding against bad subject - which would be an open generic type
-            if(t.IsGenericParameter) {
-                return (s) => !s.IsOpenGeneric() 
-                                ? new[] { s }
+            if(!protoType.IsGenericType) {
+                //if prototype is simple, non-generic, then we expect subject to be an exact match
+                return (s) => s == protoType
+                                ? Type.EmptyTypes
                                 : null;
             }
+            else { 
+                //if prototype has gen args (or params), then - via a guard ensuring that subject is itself generic - we must
+                //match each of subject's gen args to the given prototypical ones.            
+                var subInspectors = protoType.GetGenericArguments()
+                                                .Select(tt => CreateFor(tt))
+                                                .ToArray();
 
-            //if prototype has gen args (or params), then we delegate downwards, via a guard comparing that gendef is as expected
+                return (subject) => {
+                    if(!subject.IsGenericType) { //simple but effective guard
+                        return null;
+                    }
 
-            //need to prebuild genarg inspectors here, injecting them into below lambda
-            //these will always need to be pre-built! Cos we're building once for every possible inspection
+                    //************************************
+                    //need to check gendef is correct!
+                    //************************************
 
-            //instead of list of types, need to relate each match to prototype's gen param, which it should share with concrete impl.
+                    var subjectGenArgs = subject.GetGenericArguments();
 
-            return s => {
-                if(!s.IsGenericType) {
-                    return null;
-                }
+                    if(subjectGenArgs.Length != subInspectors.Length) { //avoids failing messily on subsequent loop
+                        return null;
+                    }
+                    
+                    //try to match gen args one by one, ensuring clean, immediate quit if discrepency found
+                    var matched = Enumerable.Empty<Type>();
 
-                //try to match all gen args of prototype
-                //one by one, ensuring clean, immediate quit if bad match found
-                var matched = Enumerable.Empty<Type>();
+                    for(int i = 0; i < subInspectors.Length; i++) 
+                    {
+                        var subInspector = subInspectors[i];
 
-                foreach(var protoGenArg in t.GetGenericArguments()) {
+                        var result = subInspector(subjectGenArgs[i]);
 
-                }
+                        if(result == null) {
+                            return null;
+                        }
 
-                throw new NotImplementedException();
+                        matched = matched.Concat(result);
+                    }
 
-
-                //subject should be gen type itself
-                //otherwise bad
-
-
-            };
+                    return matched;
+                };
+            }
         }
     }
 
