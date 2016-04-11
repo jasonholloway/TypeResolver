@@ -11,38 +11,22 @@ namespace TypeResolver
     public static class Analyser
     {
 
-        public static TypeVector Analyse(Type subType, Type superType) 
+        public static TypeResolver Analyse(Type concreteType, Type abstractType) 
         {
-            //IsGenericTypeDefinition only cares about the immediate type
-            //a nested generic is invisible to it
+            var inspector = TypeInspectorComposer.CreateFor(abstractType);
 
-            //ALL WE NEED TO DO IS TO SATISFY THE CONCRETE-TYPE'S GENARG NEEDS
-            //it's already assumed that the two types relate to each other.
+            //but now we have to relate results of inspection to concrete type's requirements...
 
-            //each supertype, implicit also, should be inspected suchly
+            //inspector will always return args in particular order
+            //we need to rearrange them into concrete type's intended order
+            //we can get concrete gen params by running inspector on its prototype:
 
-            //IS IT SUFFICIENT? - that is the question
+            var concreteGenParams = inspector(abstractType);
 
-            //and its only gen args we care about in this...
-
-
-            if(subType.IsGenericTypeDefinition ^ superType.IsGenericTypeDefinition) {
-                return null;
-            }
-
-            if(superType.IsAssignableFrom(subType)) {
-                return new SimpleTypeVector();
-            }
-
-            //either clean wrong or both generic 
+            //and use this to build rearranger
             //...
-            
-            if(!subType.IsGenericTypeDefinition) {
-                return null;
-            }
 
-
-            return new TypeVector(); ;                        
+            return new TypeResolver();                    
         }
 
 
@@ -70,7 +54,7 @@ namespace TypeResolver
             if(!protoType.IsGenericType) {
                 //if prototype is simple, non-generic, then we expect subject to be an exact match
                 return (s) => s == protoType
-                                ? Type.EmptyTypes
+                                ? Enumerable.Empty<Type>()
                                 : null;
             }
             else { 
@@ -122,13 +106,13 @@ namespace TypeResolver
 
 
 
-    public class SimpleTypeVector : TypeVector 
+    public class SimpleTypeResolver : TypeResolver 
     {
 
     }
 
 
-    public class TypeVector
+    public class TypeResolver
     {
 
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace TypeResolver.Tests
 {
@@ -26,41 +27,41 @@ namespace TypeResolver.Tests
 
         [TestMethod]
         public void AcceptsSimpleRelation() {
-            var vec = Analyser.Analyse(typeof(Simple), typeof(ISimple));
+            var vec = Analyser.Analyse(typeof(Simple), typeof(Simple).GetInterfaces().Single());
 
             Assert.IsNotNull(vec);
         }
 
         [TestMethod]
         public void AcceptsSymmetricalGenericRelation() {
-            var vec = Analyser.Analyse(typeof(SimpleGeneric<>), typeof(ISimpleGeneric<>));
+            var vec = Analyser.Analyse(typeof(SimpleGeneric<>), typeof(SimpleGeneric<>).GetInterfaces().Single());
 
             Assert.IsNotNull(vec);
         }
 
         [TestMethod]
         public void AcceptsFullySpecifiedGenericRelation() {
-            var vec = Analyser.Analyse(typeof(SimpleGeneric<string>), typeof(ISimpleGeneric<string>));
+            var vec = Analyser.Analyse(typeof(SimpleGeneric<string>), typeof(SimpleGeneric<string>).GetInterfaces().Single());
 
             Assert.IsNotNull(vec);
         }
 
-        [TestMethod]
-        public void AcceptsNestedGenericArg() {
-            var tNestedAbstract = typeof(ISimpleGeneric<>).MakeGenericType(typeof(List<>));
+        //[TestMethod]
+        //public void AcceptsNestedGenericArg() {
+        //    var tNestedAbstract = typeof(ISimpleGeneric<>).MakeGenericType(typeof(List<>));
 
-            var vec = Analyser.Analyse(typeof(NestedGeneric<>), tNestedAbstract);
+        //    var vec = Analyser.Analyse(typeof(NestedGeneric<>), tNestedAbstract);
 
-            Assert.IsNotNull(vec);
-        }
+        //    Assert.IsNotNull(vec);
+        //}
 
 
-        [TestMethod]
-        public void RejectsBadSimple() {
-            var vec = Analyser.Analyse(typeof(Simple), typeof(IAnother));
+        //[TestMethod]
+        //public void RejectsBadSimple() {
+        //    var vec = Analyser.Analyse(typeof(Simple), typeof(IAnother));
 
-            Assert.IsNull(vec);
-        }
+        //    Assert.IsNull(vec);
+        //}
 
 
 

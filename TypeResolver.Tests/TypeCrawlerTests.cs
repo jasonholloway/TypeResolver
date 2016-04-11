@@ -87,6 +87,7 @@ namespace TypeResolver.Tests
         }
 
 
+
         interface IBlah<T> { }
 
         class Blah<T> : IBlah<T[]> { }
